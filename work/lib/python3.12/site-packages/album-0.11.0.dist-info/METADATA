@@ -1,0 +1,58 @@
+Metadata-Version: 2.1
+Name: album
+Version: 0.11.0
+Summary: album is a tool for unifying computational tools across frameworks, languages, and environments
+Home-page: https://gitlab.com/album-app/album
+Author: Kyle Harrington, Jan Philipp Albrecht, Deborah Schmidt
+Maintainer: Kyle Harrington, Jan Philipp Albrecht, Deborah Schmidt
+Maintainer-email: album@kyleharrington.com
+License: MIT
+Project-URL: Source, https://gitlab.com/album-app/album
+Project-URL: Tracker, https://gitlab.com/album-app/album/issues
+Keywords: virtual,environments,imaging,data analysis
+Platform: any
+Classifier: Development Status :: 3 - Alpha
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Microsoft :: Windows
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: Implementation :: PyPy
+Classifier: Topic :: Utilities
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: pyyaml >=5.4.1
+Requires-Dist: validators >=0.18.2
+Requires-Dist: gitpython >=3.1.13
+Requires-Dist: requests >=2.25.1
+Requires-Dist: pexpect >=4.8.0
+Requires-Dist: album-runner >=0.5.5
+Requires-Dist: jsonschema >=4.0.0
+Requires-Dist: colorlog >=6.6.0
+Requires-Dist: packaging >=21.3
+Requires-Dist: pre-commit >=2.20.0
+Requires-Dist: pywin32 >=303 ; platform_system == "Windows"
+
+# album
+
+Introduction: [https://album.solutions/](https://album.solutions/)
+
+Documentation: [https://docs.album.solutions/](https://docs.album.solutions/)
+
+## Citation
+
+Albrecht, J.P.\*, Schmidt, D.\*, and Harrington, K., 2021. Album: a
+framework for scientific data processing with software solutions of
+heterogeneous tools. arXiv preprint arXiv:2110.00601.  
+https://arxiv.org/abs/2110.00601
+
+## Developers
+
+- Kyle Harrington, Max Delbrueck Center for Molecular Medicine in the
+Helmholtz Association
+- Jan Philipp Albrecht, Max Delbrueck Center for Molecular Medicine in
+  the Helmholtz Association
+- Deborah Schmidt, Max Delbrueck Center for Molecular Medicine in
+  the Helmholtz Association
