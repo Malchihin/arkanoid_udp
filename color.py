@@ -5,7 +5,7 @@ import socket
 from time import sleep
 
 
-camera = cv2.VideoCapture("/dev/video2")
+camera = cv2.VideoCapture(0)
 arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_250)
 arucoParam = cv2.aruco.DetectorParameters()
 arucoDetect = cv2.aruco.ArucoDetector(arucoDict,arucoParam)
@@ -49,11 +49,13 @@ cv2.createTrackbar("V_min","Trackbars",0,max_rgb_color,nope)
 cv2.createTrackbar("V_max","Trackbars",23,max_rgb_color,nope)
 
 #udp
-UDP_IP = "192.168.1.100"  # IP-адрес ESP32
-UDP_PORT = 8888
+UDP_IP = " 192.168.4.1" 
+UDP_PORT = 80
+r = 25
+h = 1
 
-def send_command(result, hit):
-    message = f"{result:03d}{hit}"
+def send_command(r, h):
+    message = f"{result:03d}{h}"
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
 
