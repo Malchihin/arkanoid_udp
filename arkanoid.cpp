@@ -7,7 +7,7 @@ const char *password = "123456788";
 
 WiFiServer server(80);
 
-void setup()  {
+void setup() {
   Serial.begin(115200);
   Serial.println();
   Serial.println("Configuring access point...");
@@ -23,7 +23,7 @@ void setup()  {
 }
 
 void loop() {
-  WiFiClient client = server.available(); // Use available() to check for a client
+  WiFiClient client = server.available();
   if (client) {
     Serial.println("New client connected");
     while (client.connected()) {
@@ -31,16 +31,15 @@ void loop() {
         uint8_t Buffer[4];
         client.read(Buffer, 4);
 
-        int speed = (Buffer[0] - '0') * 100 + (Buffer[1] - '0') * 10 + (Buffer[2] - '0');
-        int relay = Buffer[3] - '0';
+        int speed = (Buffer[0] * 100) + (Buffer[1] * 10) + Buffer[2];
+        int relay = Buffer[3];
 
-        Serial.print("Speed: ");
+        Serial.print("Speed:");
         Serial.println(speed);
-        Serial.print("Relay: ");
+        Serial.print("Relay:");
         Serial.println(relay);
       }
     }
-    client.stop();
-    Serial.println("Client disconnected");
   }
 }
+
