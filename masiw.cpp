@@ -1,4 +1,5 @@
 #include <stdio.h>
+
  
 int main(void){
     int arr[] = { 1, 2, 3 }, i;
@@ -7,4 +8,4 @@ int main(void){
       printf("%d\n", arr[2]);
  
     return 0;
-}q
+}
