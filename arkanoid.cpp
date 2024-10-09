@@ -10,19 +10,22 @@ WiFiServer server(80);
 unsigned long fastbreak = 0;
 unsigned long timer = 0;
 
-const int Motor1_1 = 1;
-const int Motor1_2 = 2;
-const int Motor2_1 = 3;
-const int Motor2_2 = 4;
+const int Motor1_1 = 17; // IN1
+const int Motor1_2 = 18; // IN2
+const int Motor1_3 = 16; // ENA
+
+const int Motor2_1 = 21; // IN3
+const int Motor2_2 = 22; // IN4
+const int Motor2_3 = 23; // ENB
 
 void setup() {
   pinMode(Motor1_1, OUTPUT);
   pinMode(Motor1_2, OUTPUT);
+  pinMode(Motor1_3, OUTPUT);
+
   pinMode(Motor2_1, OUTPUT);
   pinMode(Motor2_2, OUTPUT);
-  
-  //pinMode(relay1, OUTPUT);
-  //pinMode(relay2, OUTPUT);
+  pinMode(Motor2_3, OUTPUT);
 
   Serial.begin(115200);
   Serial.println();
@@ -50,10 +53,15 @@ void loop() {
           int motor = data.substring(0, commaIndex).toInt();
           int relay = data.substring(commaIndex + 1).toInt();
 
+          int speed_left = motor;
+          int speed_right = motor;
+
           Serial.print("Motor: ");
           Serial.println(motor);
           Serial.print("Relay: ");
           Serial.println(relay);
+
+          motors(speed_left, speed_right);
         }
       }
     }
@@ -62,24 +70,30 @@ void loop() {
   }
 }
 
-void motors(int motor) {
-  int speed_left = constrain(motor, -255, 255);
-  int speed_right = constrain(motor, -255, 255);
+void motors(int speed_left, int speed_right) {
+  speed_left = constrain(speed_left, -255, 255);
+  speed_right = constrain(speed_right, -255, 255);
 
+  // Управление первым мотором
   if (speed_left >= 0) {
-    digitalWrite(Motor1_1, LOW);
-    analogWrite(Motor1_2, speed_left);
-  } else {
     digitalWrite(Motor1_1, HIGH);
-    analogWrite(Motor1_2, abs(speed_left));
+    digitalWrite(Motor1_2, LOW);
+    analogWrite(Motor1_3, speed_left);
+  } else {
+    digitalWrite(Motor1_1, LOW);
+    digitalWrite(Motor1_2, HIGH);
+    analogWrite(Motor1_3, abs(speed_left));
   }
 
+  // Управление вторым мотором
   if (speed_right >= 0) {
-    digitalWrite(Motor2_1, LOW);
-    analogWrite(Motor2_2, speed_right);
-  } else {
     digitalWrite(Motor2_1, HIGH);
-    analogWrite(Motor2_2, abs(speed_right));
+    digitalWrite(Motor2_2, LOW);
+    analogWrite(Motor2_3, speed_right);
+  } else {
+    digitalWrite(Motor2_1, LOW);
+    digitalWrite(Motor2_2, HIGH);
+    analogWrite(Motor2_3, abs(speed_right));
   }
 }
 

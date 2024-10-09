@@ -2,10 +2,9 @@ import cv2
 import numpy as np
 import cv2.aruco
 import socket
-from time import sleep
+import time
 
-
-camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture("/dev/video0")
 arucoDict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_250)
 arucoParam = cv2.aruco.DetectorParameters()
 arucoDetect = cv2.aruco.ArucoDetector(arucoDict,arucoParam)
@@ -27,12 +26,13 @@ cornes_y = 480
 cornes_x = 0
 robotID = 8
 
-kp = 0.7
-kd = 1.1
+error_l = 70
+kp = 0.9
+kd = 1.8
 k = 0.8
 result = 0
 motor = 0
-hit = 1
+hit = 0
 
 flag = False
 
@@ -41,26 +41,30 @@ def nope():
     pass
 
 cv2.namedWindow("Trackbars")
-cv2.createTrackbar("H_min","Trackbars",75,max_rgb_color,nope)
-cv2.createTrackbar("H_max","Trackbars",216,max_rgb_color,nope)
-cv2.createTrackbar("S_min","Trackbars",138,max_rgb_color,nope)
+cv2.createTrackbar("H_min","Trackbars",144,max_rgb_color,nope)
+cv2.createTrackbar("H_max","Trackbars",250,max_rgb_color,nope)
+cv2.createTrackbar("S_min","Trackbars",193,max_rgb_color,nope)
 cv2.createTrackbar("S_max","Trackbars",255,max_rgb_color,nope)
 cv2.createTrackbar("V_min","Trackbars",0,max_rgb_color,nope)
-cv2.createTrackbar("V_max","Trackbars",23,max_rgb_color,nope)
+cv2.createTrackbar("V_max","Trackbars",255,max_rgb_color,nope)
 
-#udp
-UDP_IP = " 192.168.4.1" 
-UDP_PORT = 80
-r = 25
-h = 1
+######### esp udp #########
+def nope(x):
+    pass
 
-def send_command(r, h):
-    message = f"{result:03d}{h}"
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.sendto(message.encode(), (UDP_IP, UDP_PORT))
-
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_name = ('192.168.4.1', 80)
+server_socket.connect(server_name)
 
 while True:
+
+    speed = result
+    solenoid_state = hit
+
+    data = f"{speed},{solenoid_state}\n"
+
+    server_socket.send(data.encode("utf-8"))
+
     r_min = cv2.getTrackbarPos("H_min","Trackbars")
     r_max = cv2.getTrackbarPos("H_max", "Trackbars")
     g_min = cv2.getTrackbarPos("S_min", "Trackbars")
@@ -69,7 +73,6 @@ while True:
     b_max = cv2.getTrackbarPos("V_max", "Trackbars")
 
     _,img = camera.read(0)
-    #img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
 
     hsv = cv2.inRange(cv2.cvtColor(img,cv2.COLOR_BGR2HSV), np.array([b_min,g_min,r_min]), np.array([b_max,g_max,r_max]))
     mom = cv2.moments(hsv, 255)
@@ -84,6 +87,8 @@ while True:
                 #print(cornes_y)
                 #print(cornes_x)
                 #print(str(markerID))
+
+
                 cv2.putText(img, ID,(90,70),cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
                 cv2.circle(img, (int(cornes[0][0]),int(cornes[0][1])), 5, (250,3,5), -1)
                 cv2.circle(img, (int(cornes[1][0]),int(cornes[1][1])), 5, (250,3,5), -1)
@@ -126,37 +131,46 @@ while True:
                     x4 = int((y3 - b2) / k2)
                     x5 = int((cornes_y-b)/k)
 
-                    error = cornes_x - x3 
+                ######### pd motor #########
+
+                    error = cornes_x - x3
+
+                    if error <= 31 and error >= -31:
+                        error = 0
 
                     p = error * kp
-                    d = error * kd
+                    d = (error - error_l) * kd
                     result = int (p + d)
 
-                    if error <= 22 and error >= -22:
-                       error = 0
-                    
-                    if error <=0 and motor // 10 > error and motor > -255:
+                    if result > 200:
+                        result = 200
+                    elif result > -200:
+                        result = -200
+
+                    errorY = y3 - cornes_y 
+                    if errorY <= 35 and time.time() - timer >= 1:
+                        timer = time.time()
+                        hit = 1
+                        
+                    ######### da or no motor #########  
+
+                    if error <=0 and motor // 0 > error and motor > -255:
                         motor -= 255
                     elif 0 <=error and motor // 10 < error and motor < 255:
                         motor += 255
                     flag = True
 
-                    hit = 0
-                    errorY = y3 - cornes_y
-                    if y3 - cornes_y <= 750:
-                        hit = 1
-
-                    print(errorY)
+                    #print(motor)
                     print(hit)
 
-                    #(error)    
-                cv2.line(img, (x1, y1), (x2, y2), (250, 0, 0), 5)
+                    #(error)
+                cv2.line(img, (x1, y1), (x2, cornes_y), (250, 0, 0), 5)
                 cv2.line(img,(x2,y2), (x4, cornes_y), (250, 250, 0), 5)
-                # cv2.putText(img, error,(90,70),cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
+                cv2.putText(img, error,(90,70),cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,255), 2)
 
         else:
             points.clear()
-            x1,x2,y1,y2,y3,x4,x5,cornes_x,cornes_y,error,p,d,result,hit   = 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            x1,x2,y1,y2,y3,x4,x5,cornes_x,cornes_y,error,p,d,result  = 0,0,0,0,0,0,0,0,0,0,0,0,0
 
     except:points.clear()
 
@@ -166,7 +180,6 @@ while True:
     cv2.imshow("IMG2", hsv)
 
     if cv2.waitKey(1) & 0xFF == ord("q"):
-        result = 0
         break
 
 
